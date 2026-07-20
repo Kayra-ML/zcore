@@ -1,0 +1,69 @@
+{
+  "name": "zcoredesk",
+  "productName": "Zcore",
+  "description": "Zcore Control Panel",
+  "author": "Zcore Team",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist-electron/electron/main.js",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"npm run electron:dev\"",
+    "electron:dev": "wait-on tcp:5173 && npx esbuild src/electron/preload.ts --bundle --platform=node --format=cjs --external:electron --outfile=dist-electron/electron/preload.cjs && tsc -p tsconfig.electron.json && set VITE_DEV_SERVER_URL=http://localhost:5173 && electron .",
+    "build": "tsc -b && vite build && npm run electron:build",
+    "electron:build": "npx esbuild src/electron/preload.ts --bundle --platform=node --format=cjs --external:electron --outfile=dist-electron/electron/preload.cjs && tsc -p tsconfig.electron.json && electron-builder",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "build": {
+    "appId": "com.zcore.app",
+    "productName": "Zcore",
+    "directories": {
+      "output": "C:/zcore-release/"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Zcore"
+    }
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.101.2",
+    "lucide-react": "^1.23.0",
+    "prisma": "^7.8.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1",
+    "sqlite3": "^6.0.1",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@types/sqlite3": "^3.1.11",
+    "@vitejs/plugin-react": "^6.0.3",
+    "autoprefixer": "^10.5.2",
+    "concurrently": "^10.0.3",
+    "electron": "^43.0.0",
+    "electron-builder": "^26.15.3",
+    "oxlint": "^1.71.0",
+    "postcss": "^8.5.16",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.1",
+    "wait-on": "^9.0.10"
+  }
+}

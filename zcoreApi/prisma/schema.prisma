@@ -1,0 +1,202 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum BillingPeriod {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+  PAST_DUE
+  TRIAL
+}
+
+enum MarketplacePlatform {
+  TRENDYOL
+  HEPSIBURADA
+  N11
+  AMAZON
+  MANUAL
+}
+
+enum StoreStatus {
+  ACTIVE
+  ERROR
+  DISCONNECTED
+  PENDING
+}
+
+enum PaymentStatus {
+  SUCCESS
+  FAILED
+  PENDING
+  REFUNDED
+}
+
+enum PaymentProvider {
+  IYZICO
+  STRIPE
+  MANUAL
+}
+
+enum AppPlatform {
+  WINDOWS
+  MAC
+  LINUX
+}
+
+model User {
+  id             String         @id @default(uuid())
+  email          String         @unique
+  googleId       String?        @unique
+  name           String?
+  avatarUrl      String?
+  role           UserRole       @default(USER)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  subscriptions  Subscription[]
+  stores         Store[]
+  trackedProducts TrackedProduct[]
+  devices        Device[]
+  payments       Payment[]
+}
+
+model Plan {
+  id             String         @id @default(uuid())
+  name           String
+  productLimit   Int
+  storeLimit     Int
+  deviceLimit    Int
+  price          Float
+  currency       String         @default("TRY")
+  billingPeriod  BillingPeriod
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  subscriptions  Subscription[]
+
+  @@unique([name, billingPeriod])
+}
+
+model Subscription {
+  id                     String             @id @default(uuid())
+  userId                 String
+  planId                 String
+  status                 SubscriptionStatus
+  startDate              DateTime
+  endDate                DateTime
+  provider               String
+  providerSubscriptionId String?
+  cancelAtPeriodEnd      Boolean            @default(false)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  user                   User               @relation(fields: [userId], references: [id])
+  plan                   Plan               @relation(fields: [planId], references: [id])
+  payments               Payment[]
+}
+
+model Store {
+  id                  String              @id @default(uuid())
+  userId              String
+  name                String
+  platform            MarketplacePlatform
+  externalStoreId     String?
+  status              StoreStatus
+  lastSyncAt          DateTime?
+  syncEnabled         Boolean             @default(true)
+  notificationEnabled Boolean             @default(true)
+  lastError           String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  user                User                @relation(fields: [userId], references: [id])
+  trackedProducts     TrackedProduct[]
+
+  @@unique([userId, platform, externalStoreId])
+  @@index([userId])
+}
+
+model TrackedProduct {
+  id                   String              @id @default(uuid())
+  userId               String
+  storeId              String
+  marketplaceProductId String
+  sku                  String?
+  barcode              String?
+  name                 String
+  isActive             Boolean             @default(true)
+  trackedAt            DateTime?
+  minStockThreshold    Int?
+  minProfitMargin      Decimal?            @db.Decimal(5, 2)
+  notificationsEnabled Boolean             @default(true)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  user                 User                @relation(fields: [userId], references: [id])
+  store                Store               @relation(fields: [storeId], references: [id])
+
+  @@unique([storeId, marketplaceProductId])
+  @@index([userId])
+  @@index([storeId])
+}
+
+model Device {
+  id          String      @id @default(uuid())
+  userId      String
+  deviceHash  String
+  deviceName  String?
+  os          String?
+  appVersion  String?
+  lastLoginAt DateTime?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id])
+
+  @@unique([userId, deviceHash])
+}
+
+model Payment {
+  id                String          @id @default(uuid())
+  userId            String
+  subscriptionId    String?
+  amount            Float
+  currency          String          @default("TRY")
+  status            PaymentStatus
+  provider          PaymentProvider
+  providerPaymentId String?
+  paidAt            DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  user              User            @relation(fields: [userId], references: [id])
+  subscription      Subscription?   @relation(fields: [subscriptionId], references: [id])
+}
+
+model AppVersion {
+  id          String      @id @default(uuid())
+  version     String
+  platform    AppPlatform
+  downloadUrl String
+  changelog   String?
+  isRequired  Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+}

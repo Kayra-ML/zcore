@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>zcoredesk</title>
+  </head>
+  <body>
+    <div id="root">
+      <style>
+        body { background: #0A0B0E; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        .zcore-spinner {
+          width: 40px; height: 40px; border: 3px solid rgba(255, 255, 255, 0.1);
+          border-radius: 50%; border-top-color: #a078ff; animation: zcore-spin 1s ease-in-out infinite;
+        }
+        @keyframes zcore-spin { to { transform: rotate(360deg); } }
+      </style>
+      <div class="zcore-spinner"></div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

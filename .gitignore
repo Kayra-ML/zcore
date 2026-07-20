@@ -1,0 +1,28 @@
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Node modules
+node_modules/
+dist/
+build/
+.next/
+out/
+
+# Big archives / binaries
+*.zip
+*.rar
+*.tar.gz
+*.exe
+*.dll
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
